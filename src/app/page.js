@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const statusArray = ["Pending", "Current", "Completed"];
 
-  const [currentStatus, setCurrentStatus] = useState("pending");
+  const [currentStatus, setCurrentStatus] = useState("Pending");
   const [editIndex, setEditIndex] = useState(null);
-
+  const [selectedStatus, setSelectedStatus] = useState("None");
   const [tasks, setTasks] = useState([]);
 
   const [showError, setShowError] = useState(false);
@@ -25,11 +25,11 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const stored = localStorage.getItem("tasks")
-    if(stored){
+    const stored = localStorage.getItem("tasks");
+    if (stored) {
       setTasks(JSON.parse(stored));
     }
-  },[])
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -42,11 +42,10 @@ export default function Home() {
     }
 
     if (editIndex !== null) {
-      const updatedTasks = tasks.map((item, index) =>
-        index === editIndex ? task : item
+      const updatedTasks = tasks.map((t, index) =>
+        index === editIndex ? task : t
       );
       setTasks(updatedTasks);
-      localStorage.setItem("tasks", JSON.stringify(updatedTasks));
       setEditIndex(null);
     } else {
       setTasks([...tasks, task]);
@@ -65,10 +64,18 @@ export default function Home() {
   return (
     <div className="bg-gray-900 min-h-screen w-screen">
       <div className="bg-gray-700 px-6 min-w-full flex justify-between items-center py-2">
-        <p>You Daily To-Do List</p>
+        <p>Your Daily To-Do List</p>
 
         <button
           onClick={() => {
+            setTask({
+              title: "",
+              description: "",
+              status: "Pending",
+            });
+            setCurrentStatus("Pending");
+            setEditIndex(null); // important
+            setShowError(false);
             setShowForm(true);
           }}
           className="text-black text-md bg-purple-400 px-4 py-1 rounded-full"
@@ -76,7 +83,24 @@ export default function Home() {
           ➕ Add new task
         </button>
       </div>
-
+      <div
+        className="mt-3 ml-5 text-black"
+        value={selectedStatus}
+        onChange={(e) => {
+          const filteredStatus = tasks.filter(
+            (item) => item.status === selectedStatus
+          );
+          setSelectedStatus(e.target.value);
+          console.log("tasks=", filteredStatus);
+        }}
+      >
+        <select className="bg-white">
+          <option>Pending</option>
+          <option>Current</option>
+          <option>Completed</option>
+          <option>None</option>
+        </select>
+      </div>
       {/* {tasks.length > 0 && ( */}
       {true && (
         <div className="grid grid-cols-4 flex gap-3 w-full px-4 py-3">
@@ -136,7 +160,7 @@ export default function Home() {
                   <button
                     onClick={() => {
                       const filteredTasks = tasks.filter(
-                        (item, index) => index !== idx
+                        (_, index) => index !== idx
                       );
                       setTasks(filteredTasks);
                     }}
@@ -232,7 +256,7 @@ export default function Home() {
                 }}
                 className="bg-purple-400 mt-4 w-full rounded-full px-6 font-semibold text-sm py-2 text-black"
               >
-                {editIndex === null ? "➕add task" : "✏️updated Task"}
+                {editIndex === null ? "➕Add Task" : "✏️Update Task"}
               </button>
             </div>
           </div>
@@ -241,5 +265,3 @@ export default function Home() {
     </div>
   );
 }
-
-
